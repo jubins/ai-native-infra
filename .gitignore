@@ -216,3 +216,26 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Secrets / local config
+.env.*
+!.env.example
+
+# Terraform
+.terraform/
+*.tfstate*
+crash.log
+
+# Docker
+*.pid
+*.seed
+
+# Node (if you ever mix tooling)
+node_modules/
