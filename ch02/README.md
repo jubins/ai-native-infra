@@ -1,6 +1,6 @@
 # Chapter 2 — Companion code
 
-This folder contains the runnable code for every listing in chapter 2.
+Companion folder for **Chapter 2 — First principles and architectural patterns**.
 
 ## Setup
 
