@@ -1,85 +1,80 @@
-# Chapter 1 Companion Files
+# Chapter 1 — Companion code
 
 Companion folder for **Chapter 1 — The AI-Native Paradigm Shift**.
 
-## Layout
-
-```
-companion/
-├── README.md
-│
-├── figures/                    # Pre-rendered PNGs embedded in the chapter
-│   ├── figure_1_1.png          # The AI-native spectrum
-│   ├── figure_1_2.png          # The four governance principles as a chain
-│   ├── figure_1_3.png          # Decision guardrail specification (4-quadrant)
-│   └── figure_1_4.png          # Health checker architecture
-│
-├── figure_code/                # Sources for regenerating artefacts
-│   ├── make_figures.py         # matplotlib script that produces every figure
-│   └── build_ch01_docx.js      # docx-js script that produced the chapter
-│
-└── listings/                   # Runnable code for every Listing in the chapter
-    ├── listing_1_1_structured_llm_call.py
-    ├── listing_1_2_setup.sh
-    ├── listing_1_3_naive_health_checker.py
-    └── listing_1_4_to_1_9_health_checker.py
-```
-
-## Regenerating the figures
-
-The figures use a scholarly Manning-flavoured palette (dark red `#8B2A2A`,
-navy `#1E3A5F`, warm beige fills, slate borders) and are rendered with
-matplotlib at 200 DPI.
+## Setup
 
 ```bash
-pip install matplotlib
-python figure_code/make_figures.py
-# PNGs land in /home/claude/work/figs/ — adjust the output path inside
-# make_figures.py if you need them somewhere else.
+pip install -r requirements.txt
+export GEMINI_API_KEY="your-api-key-here"
 ```
 
-## Regenerating the .docx
+An API key can be obtained for free from
+[Google AI Studio](https://aistudio.google.com). The free tier comfortably
+covers every exercise in chapters 1 – 10.
 
-The chapter file is produced by a single docx-js build script.
+For a fully frozen install (e.g. CI, or to reproduce exactly the versions the
+book was written against), use the lock file instead:
 
 ```bash
-npm install -g docx
-node figure_code/build_ch01_docx.js
-# Writes ch01_soni_styled.docx to /home/claude/work/.
-# The script reads figures from /home/claude/work/figs/, so run
-# make_figures.py first or update the paths inside build_ch01_docx.js.
+pip install -r requirements-lock.txt
 ```
 
-## Running the listings
-
-All listings target Python 3.11 or later.
+Then run any listing directly:
 
 ```bash
-# One-time project setup (Listing 1.2)
-bash listings/listing_1_2_setup.sh
-
-# After activating the venv:
-export GEMINI_API_KEY="your-key-from-aistudio.google.com"
-
-# Listing 1.1 — basic structured LLM call
 python listings/listing_1_1_structured_llm_call.py
-
-# Listing 1.3 — naive (deliberately flawed) health checker
-python listings/listing_1_3_naive_health_checker.py
-
-# Listings 1.4 – 1.9 — production-shaped health checker with all four
-# governance principles in action
-python listings/listing_1_4_to_1_9_health_checker.py
 ```
 
-`listing_1_4_to_1_9_health_checker.py` consolidates the six listings the
-chapter walks through (data model, class setup, AI path, regex fallback,
-audit logger, and the test harness) into one runnable module so readers
-can execute the full example end to end without copy-paste assembly.
+## Structure
+
+`listing_1_4_to_1_9_health_checker.py` is shared scaffolding: it consolidates
+Listings 1.4 – 1.9 (the production-shaped health checker) into one runnable
+module so readers can execute the full example end to end without copy-paste
+assembly. The components inside it are:
+
+- `Severity` — enum with the four severity levels every assessment must use.
+- `HealthAssessment` — dataclass that serves as the contract between the AI
+  path and the deterministic fallback. The `source` field records which path
+  produced the assessment.
+- `IntelligentHealthChecker` — class implementing all four governance
+  principles: deterministic fallback, audit logging, scope limits, and human
+  override.
+- `IntelligentHealthChecker.analyze()` — the bounded-intelligence entry point
+  used by every example in the chapter. Always returns; never throws.
+
+## Listings
+
+The mapping from listings in the chapter to files in this folder:
+
+| In the chapter | File                                       | What it does                                               |
+| -------------- | ------------------------------------------ | ---------------------------------------------------------- |
+| Listing 1.1    | `listing_1_1_structured_llm_call.py`       | Structured LLM call with Gemini; unstructured log → JSON.  |
+| Listing 1.2    | `listing_1_2_setup.sh`                     | One-time project setup (venv + dependencies).              |
+| Listing 1.3    | `listing_1_3_naive_health_checker.py`      | Naive health checker; deliberately violates governance.    |
+| Listing 1.4    | `listing_1_4_to_1_9_health_checker.py`     | Data model: `Severity` enum and `HealthAssessment`.        |
+| Listing 1.5    | `listing_1_4_to_1_9_health_checker.py`     | Class setup and the `analyze()` entry point.               |
+| Listing 1.6    | `listing_1_4_to_1_9_health_checker.py`     | The AI analysis path with timeout enforcement.             |
+| Listing 1.7    | `listing_1_4_to_1_9_health_checker.py`     | Regex-based deterministic fallback (Principle 1).          |
+| Listing 1.8    | `listing_1_4_to_1_9_health_checker.py`     | Audit logging every AI decision (Principle 2).             |
+| Listing 1.9    | `listing_1_4_to_1_9_health_checker.py`     | Test harness exercising three real-world log scenarios.    |
+
+## Listings that need an API key
+
+Listings that call Gemini require `GEMINI_API_KEY`. The naive demo and the
+setup script run without one:
+
+- **No key needed:** `listing_1_2_setup.sh`, `listing_1_3_naive_health_checker.py` *(will fail at the LLM call but compiles and imports cleanly)*
+- **Key required:** `listing_1_1_structured_llm_call.py`, `listing_1_4_to_1_9_health_checker.py`
+
+If the LLM call fails for any reason (no key, network, rate limit, timeout,
+malformed response), the envelope inside `IntelligentHealthChecker.analyze()`
+falls back to the deterministic regex path, and the script still produces
+output. This is the bounded-intelligence principle in action.
 
 ## Cost note
 
 Running `listing_1_4_to_1_9_health_checker.py` once issues at most three
-Gemini Flash calls (≈ $0.000004 total at early-2026 prices). The free
-tier of Google AI Studio comfortably covers all exercises in chapters
-1 – 10.
+Gemini Flash calls (≈ $0.000004 total at early-2026 prices). At one hundred
+thousand analyses per day — a sizeable operation — the monthly cost is
+approximately $12.
