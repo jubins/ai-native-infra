@@ -1,0 +1,133 @@
+openapi: 3.1.0
+info:
+  title: Catalog Service
+  version: 1.0.0
+  description: |
+    The catalog service of the AI-native e-commerce platform. Exposes
+    product retrieval by identifier and free-text search by intent.
+
+servers:
+  - url: http://localhost:8080
+    description: Local development gateway
+
+paths:
+  /catalog/products/{product_id}:
+    get:
+      operationId: getProduct
+      summary: Retrieve a single product by its identifier.
+      description: |
+        Returns the canonical representation of a single product. Use
+        when the caller already has the product identifier (from a
+        prior search, a saved cart, or an order line item). Does NOT
+        perform any search; pass a malformed identifier and the call
+        returns 404 rather than attempting to interpret it.
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema: { type: string, pattern: '^p_[0-9]+$' }
+          example: p_001
+      responses:
+        '200':
+          description: The product representation.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Product' }
+        '404':
+          description: No product exists with the given identifier.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /catalog/search:
+    get:
+      operationId: searchCatalog
+      summary: Search the catalog by free-text query.
+      description: |
+        Returns products whose name or description match the query,
+        ranked by semantic similarity. Use when the caller wishes to
+        find products by intent rather than exact wording. Does NOT
+        match against supplier names, internal SKUs, or warehouse
+        identifiers; use /catalog/sku-lookup for those.
+      x-confidence-aware: true
+      x-fallback-strategy: keyword_ilike
+      x-side-effects: none
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 200 }
+          example: warm jacket under $100
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        '200':
+          description: Matching products with scores and decision block.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SearchResponse' }
+        '422':
+          description: The query was missing or malformed.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+components:
+  schemas:
+    Product:
+      type: object
+      required: [id, name, price_cents]
+      properties:
+        id:          { type: string, pattern: '^p_[0-9]+$', example: p_001 }
+        name:        { type: string, example: Merino Wool Jacket }
+        price_cents:
+          type: integer
+          minimum: 0
+          description: Price in integer cents; floating-point is forbidden.
+        description: { type: string, nullable: true }
+
+    ScoredProduct:
+      allOf:
+        - $ref: '#/components/schemas/Product'
+        - type: object
+          properties:
+            match_score:
+              type: number
+              minimum: 0
+              maximum: 1
+              nullable: true
+              description: Cosine similarity between query and product; null on fallback.
+
+    SearchResponse:
+      type: object
+      required: [results, decision]
+      properties:
+        results:
+          type: array
+          items: { $ref: '#/components/schemas/ScoredProduct' }
+        decision: { $ref: '#/components/schemas/Decision' }
+
+    Decision:
+      type: object
+      required: [strategy, fallback_used, fallback_strategy]
+      properties:
+        strategy:          { type: string, enum: [semantic, keyword_ilike] }
+        confidence:        { type: number, minimum: 0, maximum: 1, nullable: true }
+        fallback_used:     { type: boolean }
+        fallback_strategy: { type: string }
+
+    Error:
+      type: object
+      required: [error_code, type, message]
+      properties:
+        error_code:     { type: string, example: MISSING_REQUIRED_FIELD }
+        type:
+          type: string
+          enum: [validation_error, auth_error, rate_limit, server_error]
+        message:        { type: string }
+        field:          { type: string, nullable: true }
+        hint:           { type: string, nullable: true }
+        retryable:      { type: boolean }
+        retry_after_ms: { type: integer, nullable: true }
