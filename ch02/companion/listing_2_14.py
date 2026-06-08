@@ -1,40 +1,46 @@
 """
-listing_2_14.py — Anti-pattern: three AI calls in a chain with no checks.
-
-Demonstrates how individual call success rates compound into pipeline failure.
-Each step is "right 95% of the time" — the chain succeeds 0.95**3 = 86%.
-With realistic 90% calls, the chain succeeds 73%.
+listing_2_13.py — Adaptive security: flag unusual requests for review.
+Run: python listing_2_13.py
 """
-import random
+from pydantic import Field
+from ch02_setup import call_with_envelope, Confidence
 
-random.seed(42)
-INDIVIDUAL_SUCCESS = 0.95
+class AnomalyResult(Confidence):
+    unusual: bool
+    reasons: list[str] = Field(default_factory=list)
 
-def ai_classify_intent(query):
-    return "lookup" if random.random() < INDIVIDUAL_SUCCESS else "GARBAGE_INTENT"
+def all_clear() -> AnomalyResult:
+    return AnomalyResult(unusual=False, reasons=[], confidence=0.0)
 
-def ai_generate_sql(intent):
-    if intent == "GARBAGE_INTENT" or random.random() >= INDIVIDUAL_SUCCESS:
-        return "SELECT * FROM nope"
-    return "SELECT id, name FROM products WHERE id = 'p_001'"
+review_queue: list[dict] = []
 
-def run(sql):
-    return [{"id": "p_001", "name": "Merino Wool Jacket"}] if "products" in sql else []
+def flag_for_review(req: dict, reasons: list[str]):
+    review_queue.append({"req": req, "reasons": reasons})
 
-def ai_summarize_rows(rows):
-    if not rows:
-        return "No data found."   # plausible-sounding nonsense built on bad SQL
-    return f"Top result: {rows[0]['name']}"
-
-def handle(query):
-    intent = ai_classify_intent(query)        #A
-    sql    = ai_generate_sql(intent)          #B
-    answer = ai_summarize_rows(run(sql))      #C
-    return answer
+def assess_request(req: dict, baseline: dict) -> None:
+    """Flag, do not block. Block decisions live in the deterministic WAF rules."""
+    out = call_with_envelope(
+        prompt=(f"Compare this request to the recent baseline.\n"
+                f"Baseline: {baseline}\nRequest: {req}\n"
+                f"Set unusual=true only if the pattern is meaningfully different."),
+        schema=AnomalyResult,
+        fallback=all_clear,
+    )
+    if out.unusual and out.confidence > 0.7:                         #A
+        flag_for_review(req, out.reasons)
 
 if __name__ == "__main__":
-    successes = sum(1 for _ in range(1000)
-                    if handle("show me my favourite jacket") == "Top result: Merino Wool Jacket")
-    print(f"Pipeline success rate over 1000 trials: {successes/10:.1f}%")
-    print(f"Each call is right {int(INDIVIDUAL_SUCCESS*100)}% of the time;")
-    print(f"the chain of three is right ~{INDIVIDUAL_SUCCESS**3*100:.0f}% of the time.")
+    baseline = {"avg_requests_per_user_per_min": 3,
+                "common_user_agents": ["Chrome", "Safari", "Firefox"],
+                "typical_endpoints": ["/catalog", "/checkout"]}
+
+    requests = [
+        {"user": "u_42", "rpm": 4,    "user_agent": "Chrome",   "endpoint": "/catalog"},
+        {"user": "u_99", "rpm": 240,  "user_agent": "curl/7.0", "endpoint": "/admin/dump"},
+    ]
+    for r in requests:
+        assess_request(r, baseline)
+
+    print(f"Review queue has {len(review_queue)} item(s):")
+    for item in review_queue:
+        print(f"  {item['req']['user']}: {item['reasons']}")
