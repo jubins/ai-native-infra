@@ -1,11 +1,12 @@
 """
-Listing 3.14 (extended): catalog/main.py
+Listing 3.19 / 3.18 (extended): catalog/main.py
 
 The chapter 2 catalog service, upgraded with:
-  - structured error envelope (Listing 3.13)
-  - confidence-carrying search response (Listing 3.6 / 3.14)
-  - the complete OpenAPI 3.1 spec from Listing 3.12 served at /openapi.json
+  - structured error envelope (Listing 3.16)
+  - confidence-carrying search response (Listing 3.19)
+  - the complete OpenAPI 3.1 spec from Listing 3.15 served at /openapi.json
   - getProduct endpoint surfacing structured 404s
+  - AI-powered /describe route (Listing 3.18)
 
 Run:
   uvicorn main:app --host 0.0.0.0 --port 8080
@@ -17,8 +18,9 @@ from typing import Optional
 import asyncpg
 import os
 import yaml
-from fastapi import FastAPI, Query
+from fastapi import Body, FastAPI, Query
 
+from describe import generate_description                        #A
 from errors import APIError, install_error_handlers
 
 
@@ -156,6 +158,44 @@ async def search(
             "fallback_strategy": "keyword_ilike",
         },
     }
+
+
+# ---------------------------------------------------------------------------
+# /catalog/products/{product_id}/describe  (Listing 3.18)
+#
+# Calls Gemini to generate a natural-language description of the product.
+# The route owns validation and data access; describe.py owns generation,
+# confidence evaluation, and fallback behaviour.
+# ---------------------------------------------------------------------------
+@app.post("/catalog/products/{product_id}/describe")
+async def describe_product(
+    product_id: str,
+    body: dict = Body(default={}),                               #B
+):
+    tone = body.get("tone", "professional")
+    if tone not in ("professional", "casual"):
+        raise APIError(422, "INVALID_TONE", "validation_error",  #C
+                       "tone must be 'professional' or 'casual'.",
+                       field="tone", retryable=False)
+
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT id, name, price_cents, description, category "
+            "FROM products WHERE id = $1", product_id)
+
+    if row is None:
+        raise APIError(404, "PRODUCT_NOT_FOUND", "validation_error", #D
+                       f"No product exists with identifier {product_id}.",
+                       field="product_id", retryable=False)
+
+    result = await generate_description(dict(row), tone)
+    return {"product_id": product_id, "tone": tone, **result}    #E
+
+#A Separation of API and generation logic.
+#B Optional request body; defaults to professional tone when omitted.
+#C Early validation using the standard error path.
+#D Non-retryable 404 for unknown products.
+#E Direct propagation of generation result and decision metadata.
 
 
 # ---------------------------------------------------------------------------

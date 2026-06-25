@@ -39,6 +39,47 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
 
+  /catalog/products/{product_id}/describe:
+    post:                                  #E
+      operationId: describeProduct
+      summary: Generate a natural-language description of a product.
+      description: |
+        Calls an LLM to produce a tone-adjusted natural-language description
+        of the product. Use when rendering product detail pages, generating
+        marketing copy, or populating agent context with product summaries.
+        Does NOT modify the product record. Falls back to a static template
+        if the LLM call fails or confidence is below threshold.
+      x-confidence-aware: true
+      x-fallback-strategy: static_template
+      x-side-effects: none
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema: { type: string, pattern: '^p_[0-9]+$' }
+          example: p_001
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DescribeRequest' }
+      responses:
+        '200':
+          description: Generated description with confidence score and decision block.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DescribeResponse' }
+        '404':
+          description: No product exists with the given identifier.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '422':
+          description: The product_id was malformed or tone was invalid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
   /catalog/search:
     get:
       operationId: searchCatalog
@@ -113,10 +154,38 @@ components:
       type: object
       required: [strategy, fallback_used, fallback_strategy]
       properties:
-        strategy:          { type: string, enum: [semantic, keyword_ilike] }
+        strategy:
+          type: string
+          enum: [semantic, keyword_ilike, llm_generated, static_template]
         confidence:        { type: number, minimum: 0, maximum: 1, nullable: true }
         fallback_used:     { type: boolean }
         fallback_strategy: { type: string }
+
+    DescribeRequest:                                              #J
+      type: object
+      properties:
+        tone:
+          type: string
+          enum: [professional, casual]
+          default: professional
+          description: |
+            Tone of the generated description. professional: formal product
+            copy suitable for B2B or detail pages. casual: conversational
+            tone suitable for social or recommendation surfaces.
+
+    DescribeResponse:                                             #K
+      type: object
+      required: [product_id, description, tone, decision]
+      properties:
+        product_id: { type: string, example: p_001 }
+        description:
+          type: string
+          description: Generated natural-language product description.
+          example: "A lightweight merino wool jacket ideal for layering..."
+        tone:
+          type: string
+          enum: [professional, casual]
+        decision: { $ref: '#/components/schemas/Decision' }
 
     Error:
       type: object

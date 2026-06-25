@@ -239,3 +239,6 @@ crash.log
 
 # Node (if you ever mix tooling)
 node_modules/
+
+# Claude Code
+.claude/

@@ -1,0 +1,37 @@
+{
+  "api": "orders",
+  "entries": [
+    {
+      "version": "1.0.0",
+      "released": "2026-04-01",
+      "changes": [
+        {
+          "kind": "added",
+          "path": "/orders.POST",
+          "description": "Initial release of the orders creation endpoint."
+        },
+        {
+          "kind": "added",
+          "path": "/orders/{order_id}.GET",
+          "description": "Initial release of the order retrieval endpoint."
+        }
+      ]
+    },
+    {
+      "version": "1.1.0",
+      "released": "2026-05-15",
+      "changes": [
+        {
+          "kind": "added",
+          "path": "/orders.POST.parameters.headers.Idempotency-Key",
+          "description": "Idempotency-Key header is now required on POST /orders. Send a fresh UUID per new operation and reuse it on retries. The server records the key and replays the original response on subsequent calls, setting Idempotent-Replay: true."
+        },
+        {
+          "kind": "changed",
+          "path": "/orders.*.responses.error",
+          "description": "All error responses now conform to the five-field structured envelope: error_code, type, message, field (nullable), hint (nullable), retryable, retry_after_ms (nullable). Previously errors returned framework-default shapes."
+        }
+      ]
+    }
+  ]
+}
