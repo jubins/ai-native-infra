@@ -30,6 +30,7 @@ def test_openapi_document_served(client):
     assert spec["info"]["title"] == "Catalog Service"
     assert set(spec["paths"].keys()) == {
         "/catalog/products/{product_id}",
+        "/catalog/products/{product_id}/describe",
         "/catalog/search",
     }
 
