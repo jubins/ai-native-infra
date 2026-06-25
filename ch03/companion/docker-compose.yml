@@ -16,11 +16,29 @@ services:
     ports:
       - "5432:5432"
 
+  postgres_orders:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: orders
+      POSTGRES_PASSWORD: orders
+      POSTGRES_DB: orders
+    volumes:
+      - ./orders/db_init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - pgdata_orders:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orders -d orders"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "5433:5432"
+
   catalog:
     build:
       context: ./catalog
     environment:
       DATABASE_URL: postgresql://catalog:catalog@postgres:5432/catalog
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
     depends_on:
       postgres:
         condition: service_healthy
@@ -32,5 +50,22 @@ services:
       timeout: 3s
       retries: 10
 
+  orders:
+    build:
+      context: ./orders
+    environment:
+      DATABASE_URL: postgresql://orders:orders@postgres_orders:5432/orders
+    depends_on:
+      postgres_orders:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8081/healthz').read()"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
 volumes:
   pgdata:
+  pgdata_orders:

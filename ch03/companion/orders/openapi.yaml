@@ -1,0 +1,151 @@
+openapi: 3.1.0
+info:
+  title: Orders Service
+  version: 1.1.0
+  description: |
+    The orders service of the AI-native e-commerce platform.
+    Exposes order creation and retrieval. All mutating endpoints require an
+    Idempotency-Key header so retries are safe (Pattern 7). All errors are
+    returned in the five-field structured envelope (Pattern 5).
+
+servers:
+  - url: http://localhost:8081
+    description: Local development orders service
+
+paths:
+  /orders:
+    post:
+      operationId: createOrder
+      summary: Create a new order for a customer.
+      description: |
+        Creates an order from a list of SKUs and quantities. Requires an
+        Idempotency-Key header — send a fresh UUID per new operation and
+        reuse the same key on retries. A repeated call with the same key
+        returns the original response without creating a duplicate order.
+        Does NOT charge the customer; payment is handled by the checkout
+        service.
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: { type: string, format: uuid }
+          description: |
+            Client-generated UUID that uniquely identifies this operation.
+            Reuse on retries; generate fresh for each new order.
+          example: 9f3e2c91-1a4b-4d7e-8c0f-2b5a6e9d0f1a
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateOrderRequest' }
+      responses:
+        '201':
+          description: Order created successfully.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+          headers:
+            Idempotent-Replay:
+              schema: { type: string, enum: ['true'] }
+              description: Present and set to "true" when the response was replayed from the idempotency store.
+        '400':
+          description: Idempotency-Key header is missing.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '422':
+          description: Request body was malformed or a referenced SKU does not exist.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /orders/{order_id}:
+    get:
+      operationId: getOrder
+      summary: Retrieve a single order by its identifier.
+      description: |
+        Returns the canonical representation of a single order. Use when
+        displaying order status, confirming creation, or building order
+        history views. Does NOT trigger any state transitions.
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema: { type: string }
+          example: ord_a1b2c3
+      responses:
+        '200':
+          description: The order representation.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '404':
+          description: No order exists with the given identifier.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+components:
+  schemas:
+    CreateOrderRequest:
+      type: object
+      required: [customer_id, items]
+      properties:
+        customer_id:
+          type: string
+          description: ID of the customer placing the order.
+          example: cus_17
+        items:
+          type: array
+          minItems: 1
+          description: Line items; each references a catalog SKU and a quantity.
+          items:
+            type: object
+            required: [sku, qty]
+            properties:
+              sku:
+                type: string
+                pattern: '^p_[0-9]+$'
+                description: Catalog product identifier.
+                example: p_001
+              qty:
+                type: integer
+                minimum: 1
+                description: Number of units to order.
+
+    Order:
+      type: object
+      required: [id, customer_id, status, total_cents]
+      properties:
+        id:
+          type: string
+          description: Server-assigned order identifier.
+          example: ord_a1b2c3
+        customer_id:
+          type: string
+          example: cus_17
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED]
+          description: |
+            PENDING: placed, not yet paid. CONFIRMED: paid, awaiting fulfilment.
+            SHIPPED: handed to the carrier. DELIVERED: signed for at destination.
+            CANCELLED: voided before fulfilment.
+        total_cents:
+          type: integer
+          minimum: 0
+          description: Order total in integer cents; floating-point is forbidden.
+
+    Error:
+      type: object
+      required: [error_code, type, message]
+      properties:
+        error_code:     { type: string, example: MISSING_IDEMPOTENCY_KEY }
+        type:
+          type: string
+          enum: [validation_error, auth_error, rate_limit, server_error]
+        message:        { type: string }
+        field:          { type: string, nullable: true }
+        hint:           { type: string, nullable: true }
+        retryable:      { type: boolean }
+        retry_after_ms: { type: integer, nullable: true }
