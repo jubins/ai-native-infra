@@ -27,58 +27,52 @@ What is new in chapter 3:
 - **Orders service** — `POST /orders` with idempotency keys (Listing 3.20), its own Postgres instance, and a machine-readable changelog (section 3.7.6).
 - The gateway and checkout services from chapter 2 are not used in this chapter — the focus is the catalog–orders pair and the contract patterns between them.
 
-> **To run:** bring down the chapter 2 stack first (`cd ch02/companion/build && docker compose -f listing_2_9_docker_compose.yml down`), then follow the Quickstart below.
+> **To run:** bring down the chapter 2 stack first (`cd ch02/companion/build && docker compose -f listing_2_9_docker_compose.yml down`), then follow Setup below.
 
----
+## Setup
+
+A Gemini API key is optional — the `/describe` endpoint falls back gracefully without one.
+
+```bash
+cd ch03/companion/build
+
+# Copy the example env file and add your Gemini key (optional)
+cp .env.example .env
+# edit .env and set GEMINI_API_KEY=your-key-here
+
+make up      # build + start postgres (catalog), postgres (orders), catalog, orders
+make smoke   # run all seven smoke tests from Listing 3.21
+make down    # stop the services
+```
+
+The catalog service listens on `http://localhost:8080`.
+The orders service listens on `http://localhost:8081`.
+Catalog Postgres is exposed on `5432`; orders Postgres on `5433`.
+
+Requirements: Docker and Docker Compose, `curl` and (recommended) `jq`, `uuidgen`
+(pre-installed on macOS; `sudo apt install uuid-runtime` on Linux),
+and Python 3.10+ if you want to run pytest locally.
+
+> **Note:** the `describe.py` endpoint (Listing 3.17) calls Gemini to generate
+> product descriptions. It implements the same bounded-intelligence envelope
+> introduced in chapter 2 (appendix A) — try the LLM, fall back to a static
+> template on any failure — but does so inline rather than importing
+> `ch02_setup.py`. The build services are self-contained Docker images; their
+> dependencies live in `build/catalog/requirements.txt` and
+> `build/orders/requirements.txt`, not in `appendix_a/`.
 
 ## Structure
 
 ```
 ch03/companion/
-├── listings/                                         # standalone concept listings (3.1–3.14)
-│   ├── listing_3_1_tool_definition.json              # self-describing tool example
-│   ├── listing_3_2_error_response_compared.json      # opaque vs. recoverable error
-│   ├── listing_3_3_catalog_openapi_compared.yaml     # loose vs. complete OpenAPI
-│   ├── listing_3_4_orders_descriptions_compared.yaml # insufficient vs. sufficient descriptions
-│   ├── listing_3_5_discovery_calls.sh                # runtime schema discovery (REST/GraphQL/gRPC)
-│   ├── listing_3_6_order_response_compared.txt       # field-varying vs. deterministic response
-│   ├── listing_3_7_order.proto                       # deterministic shape in gRPC/proto3
-│   ├── listing_3_8_error_envelope.json               # five-field error envelope (422 + 503)
-│   ├── listing_3_9_error_extensions.json             # five fields inside a GraphQL extensions object
-│   ├── listing_3_10_search_response_with_confidence.json  # confidence-carrying search response
-│   ├── listing_3_11_idempotent_post.txt              # write with idempotency key + replay
-│   ├── listing_3_12_recoverable_writes.txt           # soft delete + approval checkpoint
-│   ├── listing_3_13_deprecation_in_openapi.yaml      # two-stage field rename
-│   └── listing_3_14_changelog_machine.json           # machine-readable changelog format
-└── build/                                            # runnable platform (section 3.7, Listings 3.15–3.21)
+├── listings/     # standalone concept listings (3.1–3.14)
+└── build/        # runnable platform (section 3.7, Listings 3.15–3.21)
     ├── catalog/
-    │   ├── main.py          # Listings 3.18 + 3.19 — /describe route + search endpoint
-    │   ├── errors.py        # Listing 3.16 — structured-error middleware
-    │   ├── describe.py      # Listing 3.17 — Gemini description with static fallback
-    │   ├── openapi.yaml     # Listing 3.15 — complete OpenAPI 3.1 spec
-    │   ├── db_init.sql      # products schema + seed data (same four products as ch02)
-    │   ├── Dockerfile
-    │   └── requirements.txt
     ├── orders/
-    │   ├── main.py          # POST /orders + GET /orders/{id}
-    │   ├── errors.py        # structured-error middleware (same envelope as catalog)
-    │   ├── idempotency.py   # Listing 3.20 — idempotency store
-    │   ├── openapi.yaml     # complete OpenAPI 3.1 spec for orders
-    │   ├── changelog.json   # section 3.7.6 — machine-readable changelog
-    │   ├── db_init.sql      # orders + idempotency_keys tables + seed data
-    │   ├── Dockerfile
-    │   └── requirements.txt
-    ├── tests/
-    │   └── test_smoke.py    # pytest equivalent of the catalog smoke tests
-    ├── listing_3_15_docker_compose.yml  # postgres (catalog) + postgres (orders) + catalog + orders
-    ├── listing_3_21_smoke_tests.sh      # seven checks covering all patterns
-    ├── Makefile
-    └── .env.example
+    └── tests/
 ```
 
----
-
-## Standalone concept listings (sections 3.2–3.6)
+## Standalone listings (sections 3.2–3.6)
 
 These files are illustrative — they show the JSON, YAML, or shell commands
 discussed in each section. Read them alongside the chapter text; they do not
@@ -102,9 +96,7 @@ against a live stack).
 | 3.13 | `listings/listing_3_13_deprecation_in_openapi.yaml` | Two-stage field rename in OpenAPI |
 | 3.14 | `listings/listing_3_14_changelog_machine.json` | Machine-readable changelog format |
 
----
-
-## Build listings — upgraded platform (section 3.7)
+## Build listings — platform upgrade (section 3.7)
 
 These listings form the running stack. Together they turn the chapter 2 catalog
 into a service whose contract carries enough information that an autonomous
@@ -121,41 +113,20 @@ response is uncertain, and recover from errors without human intervention.
 | 3.20 | `build/orders/idempotency.py` | Idempotency store for POST /orders |
 | 3.21 | `build/listing_3_21_smoke_tests.sh` | Seven smoke tests covering all patterns |
 
----
-
-## Prerequisites
-
-- Docker and Docker Compose
-- `curl` and (recommended) `jq` for the smoke tests
-- `uuidgen` (pre-installed on macOS; `sudo apt install uuid-runtime` on Linux)
-- A Gemini API key for the `/describe` endpoint (falls back gracefully without one)
-- Python 3.10+ if you want to run pytest locally
-
-> **Note:** the `describe.py` endpoint (Listing 3.17) calls Gemini to generate
-> product descriptions. It implements the same bounded-intelligence envelope
-> introduced in chapter 2 (appendix A) — try the LLM, fall back to a static
-> template on any failure — but does so inline rather than importing
-> `ch02_setup.py`. The build services are self-contained Docker images; their
-> dependencies live in `build/catalog/requirements.txt` and
-> `build/orders/requirements.txt`, not in `appendix_a/`.
-
-## Quickstart
+To bring it up:
 
 ```bash
-cd build
-
-# Copy the example env file and add your Gemini key (optional)
-cp .env.example .env
-# edit .env and set GEMINI_API_KEY=your-key-here
-
-make up      # build + start postgres (catalog), postgres (orders), catalog, orders
-make smoke   # run all seven smoke tests from Listing 3.21
-make down    # stop the services
+cd ch03/companion/build
+cp .env.example .env          # add GEMINI_API_KEY=your-key-here (optional)
+make up
+make smoke
 ```
 
-The catalog service listens on `http://localhost:8080`.
-The orders service listens on `http://localhost:8081`.
-Catalog Postgres is exposed on `5432`; orders Postgres on `5433`.
+> **What this builds:** an upgraded catalog service and a new orders service, each with its own
+> Postgres instance. The catalog adds structured errors, confidence-carrying search, and
+> AI-generated descriptions. The orders service adds idempotency and a machine-readable
+> changelog. Both services expose complete OpenAPI 3.1 specs. Redis and Kafka from the
+> chapter 2 skeleton are not included — this stack focuses on the catalog–orders contract pair.
 
 ## What the smoke tests demonstrate
 
