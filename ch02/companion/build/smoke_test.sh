@@ -1,42 +1,16 @@
 #!/usr/bin/env bash
-# listing_2_13 — smoke_test.sh
-# Brings up the skeleton and verifies the four calls from the chapter.
-# Run from the build/ directory:
+# smoke_test.sh — verify the four calls from the chapter.
+# Run after listing_2_13_smoke_test.sh has brought the stack up:
 #
 #   cd ch02/companion/build
 #   bash listing_2_13_smoke_test.sh
+#   bash smoke_test.sh
 #
-# Prerequisites: Docker Desktop running, GEMINI_API_KEY exported.
+# Exits non-zero if any check fails.
 
 set -euo pipefail
 
-COMPOSE_DIR="$(dirname "$0")"
 BASE_URL="http://localhost:8080"
-
-# ── Listing 2.13 — bring up the skeleton and verify it ───────────────────────
-
-cd "$COMPOSE_DIR"
-docker compose -f listing_2_9_docker_compose.yml up -d --build  
-
-# Wait ~10 seconds for Postgres to initialize, then:
-echo "Waiting 12 s for Postgres to initialise…"
-sleep 12
-
-curl http://localhost:8080/health                                
-# -> {"status":"ok"}
-
-curl http://localhost:8080/catalog/products/p_001                
-# -> {"id":"p_001","name":"Merino Wool Jacket",...}
-
-curl "http://localhost:8080/catalog/search?q=jacket"             
-# -> [{"id":"p_001",...}, {"id":"p_003",...}]
-
-# Now try the query that motivated this chapter:
-curl "http://localhost:8080/catalog/search?q=warm%20jacket%20under%20\$100"
-# -> []                                                          
-
-# ── Automated checks (same four calls, pass/fail reported) ───────────────────
-
 PASS=0
 FAIL=0
 
@@ -58,6 +32,19 @@ check() {
 }
 
 header "Running smoke tests"
+
+curl http://localhost:8080/health                                 #A
+# -> {"status":"ok"}
+
+curl http://localhost:8080/catalog/products/p_001                #B
+# -> {"id":"p_001","name":"Merino Wool Jacket",...}
+
+curl "http://localhost:8080/catalog/search?q=jacket"             #C
+# -> [{"id":"p_001",...}, {"id":"p_003",...}]
+
+# Now try the query that motivated this chapter:
+curl "http://localhost:8080/catalog/search?q=warm%20jacket%20under%20\$100"
+# -> []                                                          #D
 
 check "Gateway health" \
       "$BASE_URL/health" \
@@ -94,3 +81,8 @@ else
     echo "  • Docker low on memory         → allocate ≥ 4 GB in Docker Desktop"
     exit 1
 fi
+
+#A Confirm the gateway itself is up.
+#B End-to-end exact-match path: gateway → catalog → Postgres.
+#C Substring search — returns rows whose name contains the literal token "jacket".
+#D The skeleton fails on this query. This is the failure semantic-first architecture addresses.

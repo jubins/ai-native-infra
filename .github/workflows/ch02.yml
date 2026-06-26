@@ -1,0 +1,29 @@
+name: ch02
+
+on:
+  push:
+    paths:
+      - "ch02/**"
+      - "appendix_a/**"
+      - ".github/workflows/ch02.yml"
+  pull_request:
+    paths:
+      - "ch02/**"
+      - "appendix_a/**"
+      - ".github/workflows/ch02.yml"
+
+jobs:
+  smoke:
+    name: Platform skeleton smoke tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start the stack
+        working-directory: ch02/companion/build
+        run: bash listing_2_13_bring_up_build.sh
+
+      - name: Run smoke tests
+        working-directory: ch02/companion/build
+        run: bash smoke_test.sh
