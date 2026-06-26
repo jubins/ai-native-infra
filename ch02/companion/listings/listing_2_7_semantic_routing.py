@@ -3,6 +3,8 @@ listing_2_7.py — Semantic routing: pick the service from the meaning of the re
 Run: python listing_2_7.py
 Requires GEMINI_API_KEY (falls back to path-based routing if unavailable).
 """
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).parents[3] / "appendix_a"))
 from pydantic import Field
 from ch02_setup import call_with_envelope, Confidence
 

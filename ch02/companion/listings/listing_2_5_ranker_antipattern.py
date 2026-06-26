@@ -5,6 +5,8 @@ Run: python listing_2_5.py
 Demonstrates the failure mode by simulating five days of operation, where each
 day's "popularity" comes from yesterday's ranking rather than from real signals.
 """
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).parents[3] / "appendix_a"))
 from ch02_setup import SAMPLE_PRODUCTS
 
 # Start with equal popularity for every product.

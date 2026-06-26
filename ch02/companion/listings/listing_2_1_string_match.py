@@ -2,6 +2,8 @@
 listing_2_1.py — Traditional search using string matching.
 Run: python listing_2_1.py
 """
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).parents[3] / "appendix_a"))
 from ch02_setup import SAMPLE_PRODUCTS
 
 def search_products(products: list[dict], query: str, limit: int = 20) -> list[dict]:

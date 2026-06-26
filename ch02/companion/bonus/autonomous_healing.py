@@ -3,6 +3,8 @@ Autonomous healing: diagnose, then act inside a strict scope.
 Introduced in section 2.2.3 (Table 2.4) as the Autonomous Healing pattern.
 Run: python autonomous_healing.py
 """
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).parents[3] / "appendix_a"))
 from pydantic import Field
 from ch02_setup import call_with_envelope, Confidence
 

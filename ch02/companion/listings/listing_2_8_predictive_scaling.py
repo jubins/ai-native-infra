@@ -2,6 +2,8 @@
 listing_2_13.py — Adaptive security: flag unusual requests for review.
 Run: python listing_2_13.py
 """
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).parents[3] / "appendix_a"))
 from pydantic import Field
 from ch02_setup import call_with_envelope, Confidence
 

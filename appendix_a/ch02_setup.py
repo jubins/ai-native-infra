@@ -51,16 +51,19 @@ def call_llm_structured(prompt: str, schema: Type[T], timeout_s: float = 5.0) ->
 def call_with_envelope(prompt: str,
                        schema: Type[T],
                        fallback: Callable[[], T],
+                       _llm_call: Callable[..., T] | None = None,  #A
                        timeout_s: float = 5.0,
                        min_confidence: float = 0.6) -> T:
     """The pattern every AI-native component in this book follows."""
+    llm = _llm_call or (lambda p: call_llm_structured(p, schema, timeout_s=timeout_s))
     try:
-        result = call_llm_structured(prompt, schema, timeout_s=timeout_s)
+        result = llm(prompt)
         if hasattr(result, "confidence") and result.confidence < min_confidence:
             return fallback()
         return result
     except (TimeoutError, ValidationError, Exception):
         return fallback()
+#A Injected so the same envelope works with any model and so callers can test it without a real API key.
 
 def embed(text: str) -> list[float]:
     """Turn any text into a 768-dim vector that captures its meaning."""

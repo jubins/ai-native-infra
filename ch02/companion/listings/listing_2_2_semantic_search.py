@@ -3,6 +3,8 @@ listing_2_2.py — Semantic search using embeddings.
 Run: python listing_2_2.py
 Requires GEMINI_API_KEY in the environment.
 """
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).parents[3] / "appendix_a"))
 import math
 from ch02_setup import embed, SAMPLE_PRODUCTS
 
