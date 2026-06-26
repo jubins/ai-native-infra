@@ -1,5 +1,5 @@
 """
-Listing 3.13: catalog/errors.py
+Listing 3.16: catalog/errors.py
 
 Middleware that converts every error to the structured five-field envelope
 of Listing 3.5. Centralising the rendering here prevents any individual
