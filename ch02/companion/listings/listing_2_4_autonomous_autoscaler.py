@@ -3,6 +3,8 @@ listing_2_4.py — Autonomous autoscaler that reasons from current context.
 Run: python listing_2_4.py
 Requires GEMINI_API_KEY in the environment.
 """
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).parents[3] / "appendix_a"))
 from pydantic import Field
 from ch02_setup import call_with_envelope, Confidence
 

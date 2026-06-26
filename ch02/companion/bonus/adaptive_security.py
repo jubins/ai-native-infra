@@ -3,7 +3,8 @@ Adaptive security: flag requests that deviate from a known-good baseline.
 Introduced in section 2.2.3 (Table 2.4) as the Adaptive Security pattern.
 Run: python adaptive_security.py
 """
-
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).parents[3] / "appendix_a"))
 import time
 import argparse
 import json

@@ -3,6 +3,8 @@ Observability: turn an on-call question into a structured answer.
 Introduced in section 2.2.3 (Table 2.4) as the AI-Native Observability pattern.
 Run: python observability.py
 """
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).parents[3] / "appendix_a"))
 from pydantic import Field
 from ch02_setup import call_with_envelope, Confidence
 

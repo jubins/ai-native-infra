@@ -7,6 +7,8 @@ Demonstrates the two access paths in plain Python, without needing pgvector.
 The production version uses Postgres `WHERE id = $1` for exact and
 `ORDER BY description_vec <-> $1::vector` for semantic.
 """
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).parents[3] / "appendix_a"))
 import math
 from ch02_setup import embed, SAMPLE_PRODUCTS
 

@@ -3,6 +3,8 @@ Adaptive APIs: translate a v1 payload into v2 at the edge.
 Introduced in section 2.2.3 (Table 2.4) as the Adaptive APIs pattern.
 Run: python adaptive_api.py
 """
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).parents[3] / "appendix_a"))
 from pydantic import BaseModel, Field
 from ch02_setup import call_with_envelope, Confidence
 
