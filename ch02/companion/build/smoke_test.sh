@@ -33,17 +33,17 @@ check() {
 
 header "Running smoke tests"
 
-curl http://localhost:8080/health                                 #A
+curl http://localhost:8080/health || true                         #A
 # -> {"status":"ok"}
 
-curl http://localhost:8080/catalog/products/p_001                #B
+curl http://localhost:8080/catalog/products/p_001 || true        #B
 # -> {"id":"p_001","name":"Merino Wool Jacket",...}
 
-curl "http://localhost:8080/catalog/search?q=jacket"             #C
+curl "http://localhost:8080/catalog/search?q=jacket" || true     #C
 # -> [{"id":"p_001",...}, {"id":"p_003",...}]
 
 # Now try the query that motivated this chapter:
-curl "http://localhost:8080/catalog/search?q=warm%20jacket%20under%20\$100"
+curl "http://localhost:8080/catalog/search?q=warm%20jacket%20under%20\$100" || true
 # -> []                                                          #D
 
 check "Gateway health" \

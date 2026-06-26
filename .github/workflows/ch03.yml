@@ -1,4 +1,4 @@
-name: ch03
+name: ch03_build
 
 on:
   push:

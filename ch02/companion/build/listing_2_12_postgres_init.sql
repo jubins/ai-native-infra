@@ -14,7 +14,8 @@ CREATE DATABASE orders;
 
 -- ── catalog schema ───────────────────────────────────────────────────────────
 
-\c catalog;                -- B
+-- B
+\c catalog;
 
 CREATE TABLE products (
     id          TEXT    PRIMARY KEY,         -- C

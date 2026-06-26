@@ -1,4 +1,4 @@
-name: ch02
+name: ch02_build
 
 on:
   push:
@@ -23,6 +23,14 @@ jobs:
       - name: Start the stack
         working-directory: ch02/companion/build
         run: bash listing_2_13_bring_up_build.sh
+
+      - name: Wait for gateway to be ready
+        run: |
+          echo "Waiting for gateway (port 8080)..."
+          for i in $(seq 1 15); do
+            curl -sf http://localhost:8080/health >/dev/null 2>&1 && echo "gateway ready" && break
+            sleep 2
+          done
 
       - name: Run smoke tests
         working-directory: ch02/companion/build
