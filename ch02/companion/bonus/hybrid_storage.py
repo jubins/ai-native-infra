@@ -1,6 +1,7 @@
 """
-listing_2_9.py — Hybrid storage: exact match and semantic match against the same data.
-Run: python listing_2_9.py
+Hybrid storage: exact match and semantic match against the same data.
+Introduced in section 2.2.3 (Table 2.4) as the Hybrid Storage pattern.
+Run: python hybrid_storage.py
 
 Demonstrates the two access paths in plain Python, without needing pgvector.
 The production version uses Postgres `WHERE id = $1` for exact and

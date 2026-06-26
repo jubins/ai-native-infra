@@ -8,7 +8,7 @@ version: "3.9"
 services:
 
   gateway:
-    build: ../gateway
+    build: ./gateway
     ports: ["8080:8080"]
     environment:
       - CATALOG_URL=http://catalog:8001
@@ -18,19 +18,19 @@ services:
     depends_on: [catalog, checkout, orders]
 
   catalog:
-    build: ../catalog
+    build: ./catalog
     environment:
       - DATABASE_URL=postgresql://app:app@postgres:5432/catalog
     depends_on: [postgres]
 
   checkout:
-    build: ../checkout
+    build: ./checkout
     environment:
       - DATABASE_URL=postgresql://app:app@postgres:5432/checkout
     depends_on: [postgres]
 
   orders:
-    build: ../orders
+    build: ./orders
     environment:
       - DATABASE_URL=postgresql://app:app@postgres:5432/orders
     depends_on: [postgres]
@@ -41,7 +41,7 @@ services:
       - POSTGRES_USER=app
       - POSTGRES_PASSWORD=app
     volumes:
-      - ./postgres-init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./listing_2_12_postgres_init.sql:/docker-entrypoint-initdb.d/init.sql
       - pgdata:/var/lib/postgresql/data
 
   redis:

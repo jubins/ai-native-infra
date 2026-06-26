@@ -1,6 +1,7 @@
 """
-listing_2_12.py — Autonomous healing: diagnose, then act inside a strict scope.
-Run: python listing_2_12.py
+Autonomous healing: diagnose, then act inside a strict scope.
+Introduced in section 2.2.3 (Table 2.4) as the Autonomous Healing pattern.
+Run: python autonomous_healing.py
 """
 from pydantic import Field
 from ch02_setup import call_with_envelope, Confidence
