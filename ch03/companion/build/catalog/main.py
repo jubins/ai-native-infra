@@ -1,12 +1,16 @@
 """
-Listing 3.19 / 3.18 (extended): catalog/main.py
+Listings 3.18 / 3.19 — catalog/main.py
 
-The chapter 2 catalog service, upgraded with:
-  - structured error envelope (Listing 3.16)
-  - confidence-carrying search response (Listing 3.19)
-  - the complete OpenAPI 3.1 spec from Listing 3.15 served at /openapi.json
-  - getProduct endpoint surfacing structured 404s
-  - AI-powered /describe route (Listing 3.18)
+Chapter 2 (Listing 2.11) introduced this service with two bare endpoints:
+  - GET /catalog/products/{id}  — exact match returning a raw dict or {"error": "not found"}
+  - GET /catalog/search?q=      — ILIKE substring search returning a bare list
+
+This chapter upgrades each of those without changing the contract shape that
+downstream consumers depend on:
+  - Structured error envelope (Listing 3.16) replaces bare {"error": ...} strings
+  - Confidence-carrying decision block (Listing 3.19) wraps the search response
+  - Hand-curated OpenAPI 3.1 spec (Listing 3.15) served at /openapi.json
+  - AI-powered /describe route (Listing 3.18) added as a new capability
 
 Run:
   uvicorn main:app --host 0.0.0.0 --port 8080
@@ -47,11 +51,9 @@ install_error_handlers(app)
 
 
 # ---------------------------------------------------------------------------
-# OpenAPI: serve the hand-written spec from openapi.yaml at /openapi.json,
-# overriding FastAPI's auto-generated one. The chapter argues that the
-# producing team should treat the spec as a first-class artefact, derived
-# from code where possible but always reviewed; here we serve a hand-curated
-# version that meets the standard of Listing 3.12.
+# OpenAPI: chapter 2 had no spec. Here the hand-written openapi.yaml
+# (Listing 3.15) replaces FastAPI's auto-generated one, treating the spec
+# as a first-class artefact that an autonomous consumer can discover at runtime.
 # ---------------------------------------------------------------------------
 _SPEC_PATH = Path(__file__).parent / "openapi.yaml"
 _SPEC_CACHE: Optional[dict] = None
@@ -118,12 +120,11 @@ async def get_product(product_id: str):
 # ---------------------------------------------------------------------------
 # /catalog/search
 #
-# This is the chapter 2 substring search wrapped in the confidence-carrying
-# envelope of Listing 3.6. The retrieval is unchanged; what is added is the
-# decision block declaring that the deterministic fallback strategy is the
-# one in use. When chapter 4 swaps in the semantic implementation, the
-# contract does not change — only the strategy / confidence / fallback_used
-# fields take on new values.
+# Chapter 2 (Listing 2.11) returned a bare list from an ILIKE query.
+# The ILIKE retrieval is unchanged here; what is added is the decision block
+# (Listing 3.19) so callers know the strategy and confidence in use.
+# When a later chapter swaps in semantic search, only those fields change —
+# the response shape stays the same.
 # ---------------------------------------------------------------------------
 @app.get("/catalog/search")
 async def search(
@@ -163,9 +164,9 @@ async def search(
 # ---------------------------------------------------------------------------
 # /catalog/products/{product_id}/describe  (Listing 3.18)
 #
-# Calls Gemini to generate a natural-language description of the product.
-# The route owns validation and data access; describe.py owns generation,
-# confidence evaluation, and fallback behaviour.
+# New in chapter 3. Chapter 2 had no description generation — products carried
+# only static text. This route calls Gemini to produce a natural-language
+# description; describe.py owns generation, confidence evaluation, and fallback.
 # ---------------------------------------------------------------------------
 @app.post("/catalog/products/{product_id}/describe")
 async def describe_product(
