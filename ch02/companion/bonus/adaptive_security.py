@@ -1,15 +1,7 @@
 """
-listing_2_12a.py — Predictive scaling: slow loop writes, fast loop reads.
-
-Demonstrates the control-plane / data-plane split for AI-native autoscaling:
-- slow_loop()  runs every ~5 minutes; calls the model; writes a ScaleForecast to cache.
-- fast_loop()  runs every few seconds; reads the cached forecast; never calls the model.
-
-Run without an API key:
-    python listing_2_12a.py --simulate
-
-Run with a real Gemini key (set GEMINI_API_KEY in your environment):
-    python listing_2_12a.py
+Adaptive security: flag requests that deviate from a known-good baseline.
+Introduced in section 2.2.3 (Table 2.4) as the Adaptive Security pattern.
+Run: python adaptive_security.py
 """
 
 import time

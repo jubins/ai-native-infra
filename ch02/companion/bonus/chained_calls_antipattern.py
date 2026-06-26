@@ -1,9 +1,13 @@
 """
-listing_2_14.py — Anti-pattern: three AI calls in a chain with no checks.
+Anti-pattern: three AI calls in a chain with no checks.
+Discussed in section 2.3.2 as an example of how chained model calls compound failure rates.
 
 Demonstrates how individual call success rates compound into pipeline failure.
 Each step is "right 95% of the time" — the chain succeeds 0.95**3 = 86%.
 With realistic 90% calls, the chain succeeds 73%.
+
+No API key required — failure is simulated with random.seed(42).
+Run: python chained_calls_antipattern.py
 """
 import random
 

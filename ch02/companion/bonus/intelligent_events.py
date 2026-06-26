@@ -1,6 +1,7 @@
 """
-listing_2_10.py — Intelligent events: priority and routing inferred from event content.
-Run: python listing_2_10.py
+Intelligent events: priority and routing inferred from event content.
+Introduced in section 2.2.3 (Table 2.4) as the Intelligent Events pattern.
+Run: python intelligent_events.py
 """
 from pydantic import Field
 from ch02_setup import call_with_envelope, Confidence
