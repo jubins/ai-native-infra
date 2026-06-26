@@ -1,0 +1,16 @@
+# Chapter 3 — companion code dependencies
+#
+# For local development and running pytest directly:
+#   pip install -r requirements.txt
+#
+# The per-service requirements.txt files inside catalog/ and orders/ are used
+# by Docker and kept separately — do not remove them.
+
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+asyncpg==0.29.0
+pyyaml==6.0.2
+google-generativeai==0.8.3
+httpx==0.27.2
+pytest==8.3.3
+pytest-asyncio==0.24.0

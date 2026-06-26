@@ -191,9 +191,7 @@ exactly what changed at each version without parsing prose release notes.
 ## Running pytest
 
 ```bash
-cd build
 python -m venv .venv && source .venv/bin/activate
-pip install -r catalog/requirements.txt
-make up
-make test
+pip install -r requirements.txt
+cd build && make up && make test
 ```

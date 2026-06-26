@@ -9,13 +9,6 @@ pip install -r requirements.txt
 export GEMINI_API_KEY="your-api-key-here"
 ```
 
-For a fully frozen install (e.g. CI, or to reproduce exactly the versions the
-book was written against), use the lock file instead:
-
-```bash
-pip install -r requirements-lock.txt
-```
-
 Then run any listing directly:
 
 ```bash
