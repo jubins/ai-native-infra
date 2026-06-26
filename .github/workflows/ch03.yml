@@ -1,10 +1,6 @@
 name: ch03_build
 
 on:
-  push:
-    paths:
-      - "ch03/**"
-      - ".github/workflows/ch03.yml"
   pull_request:
     paths:
       - "ch03/**"

@@ -1,11 +1,6 @@
 name: ch02_build
 
 on:
-  push:
-    paths:
-      - "ch02/**"
-      - "appendix_a/**"
-      - ".github/workflows/ch02.yml"
   pull_request:
     paths:
       - "ch02/**"
