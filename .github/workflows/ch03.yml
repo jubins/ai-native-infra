@@ -1,0 +1,37 @@
+name: ch03_build
+
+on:
+  pull_request:
+    paths:
+      - "ch03/**"
+      - ".github/workflows/ch03.yml"
+
+jobs:
+  smoke:
+    name: Platform upgrade smoke tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start the stack
+        working-directory: ch03/companion/build
+        run: docker compose -f listing_3_15_docker_compose.yml up -d --build
+
+      - name: Wait for services to be healthy
+        working-directory: ch03/companion/build
+        run: |
+          echo "Waiting for catalog (port 8080)..."
+          for i in $(seq 1 15); do
+            curl -sf http://localhost:8080/healthz >/dev/null 2>&1 && echo "catalog ready" && break
+            sleep 2
+          done
+          echo "Waiting for orders (port 8081)..."
+          for i in $(seq 1 15); do
+            curl -sf http://localhost:8081/healthz >/dev/null 2>&1 && echo "orders ready" && break
+            sleep 2
+          done
+
+      - name: Run smoke tests
+        working-directory: ch03/companion/build
+        run: bash ci_smoke.sh

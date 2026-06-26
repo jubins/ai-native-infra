@@ -1,5 +1,7 @@
 # Chapter 3 — API Design and Contract Evolution
 
+![ch03](https://github.com/jubins/ai-native-infra/actions/workflows/ch03.yml/badge.svg)
+
 Companion code for chapter 3 of *AI-Native Infrastructure*.
 
 ## How this relates to chapter 2

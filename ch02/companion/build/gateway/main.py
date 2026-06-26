@@ -27,7 +27,8 @@ def health():
 async def proxy(full_path: str, request: Request):
     for prefix, upstream in ROUTES.items():       # C
         if ("/" + full_path).startswith(prefix):
-            url = f"{upstream}/{full_path}"
+            qs = request.url.query
+            url = f"{upstream}/{full_path}" + (f"?{qs}" if qs else "")
             async with httpx.AsyncClient(timeout=5.0) as client:  # D
                 body = await request.body()
                 resp = await client.request(

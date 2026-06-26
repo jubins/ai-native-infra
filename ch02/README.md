@@ -1,5 +1,7 @@
 # Chapter 2 — First Principles and Architectural Patterns
 
+![ch02](https://github.com/jubins/ai-native-infra/actions/workflows/ch02.yml/badge.svg)
+
 Companion code for chapter 2 of *AI-Native Infrastructure*.
 
 ## Setup
@@ -74,13 +76,15 @@ These are the files the chapter references in sections 2.4.5–2.4.9:
 | 2.10 | `build/gateway/main.py` | Path-based proxy gateway |
 | 2.11 | `build/catalog/main.py` | Minimal catalog service with ILIKE search |
 | 2.12 | `build/listing_2_12_postgres_init.sql` | Three databases + product seed data |
-| 2.13 | `build/listing_2_13_smoke_test.sh` | Bring up and verify the skeleton |
+| 2.13 | `build/listing_2_13_bring_up_build.sh` | Bring up all seven containers |
+| —    | `build/smoke_test.sh` | Verify the four calls from the chapter |
 
 To bring it up:
 
 ```bash
 cd ch02/companion/build
-bash listing_2_13_smoke_test.sh
+bash listing_2_13_bring_up_build.sh   # bring up all seven containers
+bash smoke_test.sh                # verify the four calls from the chapter
 ```
 
 > **What this builds:** a gateway routing to catalog, checkout, and orders,
