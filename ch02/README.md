@@ -80,7 +80,6 @@ To bring it up:
 
 ```bash
 cd ch02/companion/build
-docker compose -f listing_2_9_docker_compose.yml up -d --build
 bash listing_2_13_smoke_test.sh
 ```
 

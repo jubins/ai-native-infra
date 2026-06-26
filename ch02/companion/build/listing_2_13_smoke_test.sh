@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # listing_2_13 — smoke_test.sh
 # Brings up the skeleton and verifies the four calls from the chapter.
-# Run from the compose/ directory:
+# Run from the build/ directory:
 #
-#   cd skeleton/compose
-#   bash ../../smoke_test.sh
+#   cd ch02/companion/build
+#   bash listing_2_13_smoke_test.sh
 #
 # Prerequisites: Docker Desktop running, GEMINI_API_KEY exported.
 
@@ -12,6 +12,31 @@ set -euo pipefail
 
 COMPOSE_DIR="$(dirname "$0")"
 BASE_URL="http://localhost:8080"
+
+# ── Listing 2.13 — bring up the skeleton and verify it ───────────────────────
+
+cd "$COMPOSE_DIR"
+docker compose -f listing_2_9_docker_compose.yml up -d --build  
+
+# Wait ~10 seconds for Postgres to initialize, then:
+echo "Waiting 12 s for Postgres to initialise…"
+sleep 12
+
+curl http://localhost:8080/health                                
+# -> {"status":"ok"}
+
+curl http://localhost:8080/catalog/products/p_001                
+# -> {"id":"p_001","name":"Merino Wool Jacket",...}
+
+curl "http://localhost:8080/catalog/search?q=jacket"             
+# -> [{"id":"p_001",...}, {"id":"p_003",...}]
+
+# Now try the query that motivated this chapter:
+curl "http://localhost:8080/catalog/search?q=warm%20jacket%20under%20\$100"
+# -> []                                                          
+
+# ── Automated checks (same four calls, pass/fail reported) ───────────────────
+
 PASS=0
 FAIL=0
 
@@ -19,13 +44,6 @@ green()  { echo -e "\033[32m✓  $*\033[0m"; }
 red()    { echo -e "\033[31m✗  $*\033[0m"; }
 header() { echo -e "\n\033[1m$*\033[0m"; }
 
-# ── 1. Bring up ───────────────────────────────────────────────────────────────
-header "Starting containers"
-docker compose -f "$COMPOSE_DIR/listing_2_9_docker_compose.yml" up -d --build
-echo "Waiting 12 s for Postgres to initialise…"
-sleep 12
-
-# ── helper ────────────────────────────────────────────────────────────────────
 check() {
     local label="$1" url="$2" expected="$3"
     local body
@@ -39,25 +57,20 @@ check() {
     fi
 }
 
-# ── 2. Smoke tests ────────────────────────────────────────────────────────────
 header "Running smoke tests"
 
-# A — gateway health
 check "Gateway health" \
       "$BASE_URL/health" \
       '"status":"ok"'
 
-# B — exact-match product lookup (end-to-end through gateway → catalog → Postgres)
 check "Exact product lookup  p_001" \
       "$BASE_URL/catalog/products/p_001" \
       "Merino Wool Jacket"
 
-# C — substring search that works (literal token present in the data)
 check "Substring search  q=jacket  (expects 2 results)" \
       "$BASE_URL/catalog/search?q=jacket" \
       "p_001"
 
-# D — the motivating failure: natural-language query returns nothing
 body=$(curl -sf "$BASE_URL/catalog/search?q=warm%20jacket%20under%20%24100" || echo "CURL_FAILED")
 if [ "$body" = "[]" ]; then
     green "Semantic gap confirmed  q='warm jacket under \$100' → []  (expected)"
@@ -67,7 +80,6 @@ else
     FAIL=$((FAIL + 1))
 fi
 
-# ── 3. Summary ────────────────────────────────────────────────────────────────
 header "Results"
 echo "  passed: $PASS"
 echo "  failed: $FAIL"
