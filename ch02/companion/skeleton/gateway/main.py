@@ -1,4 +1,4 @@
-# listing_2_16 — gateway/main.py
+# listing_2_10 — gateway/main.py
 # A deliberately traditional path-based proxy.
 # Every routing rule is in the ROUTES table; there is no dynamic
 # decision-making.  This is the control in the experiment: when

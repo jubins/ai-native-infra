@@ -1,0 +1,29 @@
+# Listing 3.6 — order_response_compared.txt: field-varying response vs. deterministic response
+
+# Unpredictable: fields appear and disappear depending on data.
+
+GET /orders/ord_42
+{
+  "id":            "ord_42",
+  "total_cents":   8900,
+  "discount_cents": 1000,
+  "shipped_at":    "2026-05-15T08:55:00Z"
+}
+
+GET /orders/ord_43
+{
+  "id":          "ord_43",    # A — a human infers no discount and no shipment;
+  "total_cents": 8900         #     a typed consumer sees a different schema
+}
+
+---
+
+# Deterministic: every field present every time; absent values explicit.
+
+GET /orders/ord_43
+{
+  "id":            "ord_43",
+  "total_cents":   8900,
+  "discount_cents": 0,       # B — zero rather than omitted; numeric consumers always get an integer
+  "shipped_at":    null      # C — explicit null rather than absent key; consumer learns the order has not shipped
+}

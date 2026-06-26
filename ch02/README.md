@@ -53,11 +53,19 @@ The mapping from listings in the chapter to files in this folder:
 | Listing 2.14   | `listing_2_13.py`   | Adaptive security: flag, do not block.            |
 | Listing 2.15   | `listing_2_14.py`   | Anti-pattern: chained AI calls without checks.   |
 
-## Skeleton platform (section 2.7)
+## Skeleton platform (section 2.4, build listings 2.9–2.13)
 
-The `skeleton/` subfolder will hold the platform skeleton from section 2.7
-(gateway, catalog, checkout, orders services, plus the Compose file). To bring
-it up:
+The `skeleton/` subfolder contains the platform skeleton (Listings 2.9–2.13):
+
+| In the chapter | File | Description |
+| -------------- | ---- | ----------- |
+| Listing 2.9    | `skeleton/compose/docker-compose.yml` | Seven-container Compose stack |
+| Listing 2.10   | `skeleton/gateway/main.py` | Path-based proxy gateway |
+| Listing 2.11   | `skeleton/catalog/main.py` | Minimal catalog service with ILIKE search |
+| Listing 2.12   | `skeleton/compose/postgres-init.sql` | Three databases + product seed data |
+| Listing 2.13   | `smoke_test.sh` | Bring up and verify the skeleton |
+
+To bring it up:
 
 ```bash
 cd skeleton/compose

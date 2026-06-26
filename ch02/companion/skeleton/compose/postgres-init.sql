@@ -1,4 +1,4 @@
--- listing_2_18 — compose/postgres-init.sql
+-- listing_2_12 — compose/postgres-init.sql
 -- Creates three isolated databases (one per service) and seeds the
 -- catalog with four products.  The checkout and orders schemas are
 -- minimal stubs; they grow in later chapters.

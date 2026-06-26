@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# listing_2_19 — smoke_test.sh
+# listing_2_13 — smoke_test.sh
 # Brings up the skeleton and verifies the four calls from the chapter.
 # Run from the compose/ directory:
 #

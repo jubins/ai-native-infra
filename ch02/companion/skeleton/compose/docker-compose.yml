@@ -1,6 +1,6 @@
 version: "3.9"
 
-# listing_2_15 — docker-compose.yml
+# listing_2_9 — docker-compose.yml
 # Stands up seven containers: gateway, three domain services,
 # Postgres, Redis, and Kafka.  Redis and Kafka are wired now
 # but unused until later chapters add AI-native components.

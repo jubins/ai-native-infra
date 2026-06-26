@@ -1,0 +1,21 @@
+{
+  "name": "create_invoice",
+  "description": "Create an invoice for a customer. Returns invoice_id on success.",
+  "parameters": {
+    "customer_id": {
+      "type": "string",
+      "description": "ID of the customer being invoiced.",
+      "example": "cus_8421"
+    },
+    "amount_cents": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Invoice amount in cents."
+    },
+    "currency": {
+      "type": "string",
+      "enum": ["USD", "EUR", "GBP"],
+      "description": "ISO 4217 currency code."
+    }
+  }
+}

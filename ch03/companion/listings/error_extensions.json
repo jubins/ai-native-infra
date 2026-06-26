@@ -1,0 +1,17 @@
+// Listing 3.9 — error_extensions.json: five fields inside a GraphQL error's extensions object
+
+// HTTP/1.1 200 OK                             // A — GraphQL transport is always successful; failure is encoded in-body
+{
+  "data": { "updateOrder": null },             // B — null result signals operation failure at resolver
+  "errors": [{
+    "message": "shipped_at must be ISO 8601 with timezone offset.",   // C — human-readable diagnostic (not used for logic)
+    "path": ["updateOrder"],                   // D — localizes failure to the specific GraphQL field/resolver
+    "extensions": {
+      "error_code": "INVALID_DATE_FORMAT",
+      "type":       "validation_error",        // E — same recovery semantics as REST; agents branch on type
+      "field":      "shipped_at",
+      "hint":       "Use 2026-05-15T08:55:00Z.",
+      "retryable":  false
+    }
+  }]
+}

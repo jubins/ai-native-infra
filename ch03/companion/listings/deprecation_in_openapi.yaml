@@ -1,0 +1,27 @@
+# Listing 3.13 — deprecation_in_openapi.yaml: renaming a field, in two stages
+
+# Stage one: the new field is added; the old field is marked deprecated
+# and documented to be removed at v2.
+components:
+  schemas:
+    Order:
+      type: object
+      properties:
+        id: { type: string }
+        total_cents:                          # A — new field with clearer name and documented unit
+          type: integer
+          description: |
+            Total in integer cents. Canonical field as of v1.4.
+        total:                               # B — old field retained; existing consumers continue working
+          type: integer
+          deprecated: true                   # C — recognised by client generators, docs sites, and agents
+          description: |
+            DEPRECATED in v1.4. Use total_cents instead.
+            Will be removed at v2.0, no earlier than 2027-01-01.
+            Both fields carry the same value until removal.
+
+---
+
+# Stage two (v2.0, after deprecation window): old field is removed.
+# Between v1.4 and v2.0 (minimum 90 days), both fields are served.
+# At v2.0, only total_cents remains.

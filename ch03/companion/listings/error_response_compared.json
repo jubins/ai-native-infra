@@ -1,0 +1,11 @@
+// Listing 3.2 — error_response_compared.json: the same failure written two ways
+
+// BAD — agent cannot recover
+{ "error": "Invalid request" }
+
+// GOOD — agent self-corrects
+{
+  "error_code":    "MISSING_REQUIRED_FIELD",
+  "missing_field": "customer_id",
+  "retryable":     true
+}

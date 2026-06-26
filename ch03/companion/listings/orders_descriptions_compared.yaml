@@ -1,0 +1,37 @@
+# Listing 3.4 — orders_descriptions_compared.yaml: insufficient vs. sufficient descriptions
+
+# Insufficient: the description is too brief to use.
+paths:
+  /orders:
+    get:
+      summary: Get orders
+      description: Returns orders.    # A — empty of operational meaning
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+          description: status          # B — names the field but teaches nothing
+
+---
+
+# Sufficient: each description answers the three questions.
+paths:
+  /orders:
+    get:
+      summary: List orders for the authenticated user.
+      description: |
+        Returns the orders belonging to the authenticated user, sorted by
+        creation time descending. Use this endpoint when displaying order
+        history, status checks, or recent-purchase totals.
+        Does NOT include cancelled orders unless include_cancelled=true.
+        Orders older than 24 months are archived and require /orders/archive.   # C
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, CONFIRMED, SHIPPED, DELIVERED]
+          description: |
+            Filter to orders in the given status. PENDING: placed, not yet
+            paid. CONFIRMED: paid, awaiting fulfilment. SHIPPED: handed to
+            the carrier. DELIVERED: signed for at destination.

@@ -1,0 +1,22 @@
+// Listing 3.7 — order.proto: deterministic response shape enforced by the protocol itself
+
+syntax = "proto3";
+package orders.v1;
+
+import "google/protobuf/timestamp.proto";
+
+message Order {
+  string id            = 1;                                    // A — always present; no structural variation
+  int64  total_cents   = 2;
+  int64  discount_cents = 3;                                   // B — missing value collapses to zero; stable type
+
+  optional google.protobuf.Timestamp shipped_at = 4;          // C — optional restores explicit presence
+}
+
+service Orders {
+  rpc GetOrder(GetOrderRequest) returns (Order);               // D — response type fixed at compile time
+}
+
+message GetOrderRequest {
+  string id = 1;
+}

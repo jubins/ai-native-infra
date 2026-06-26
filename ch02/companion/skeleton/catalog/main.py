@@ -1,4 +1,4 @@
-# listing_2_17 — catalog/main.py
+# listing_2_11 — catalog/main.py
 # Minimal catalog service: two endpoints backed by Postgres.
 #
 # /catalog/products/{id}  — exact match by primary key

@@ -1,0 +1,23 @@
+{
+  "api": "orders",
+  "entries": [
+    {
+      "version": "1.4.0",
+      "released": "2026-04-15",
+      "changes": [
+        {
+          "kind": "added",
+          "path": "/orders.GET.responses.200.schema.total_cents",
+          "description": "New canonical total field in integer cents."
+        },
+        {
+          "kind": "deprecated",
+          "path": "/orders.GET.responses.200.schema.total",
+          "removed_at_version": "2.0.0",
+          "removed_no_earlier_than": "2027-01-01",
+          "replacement": "/orders.GET.responses.200.schema.total_cents"
+        }
+      ]
+    }
+  ]
+}

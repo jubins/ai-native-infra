@@ -1,0 +1,35 @@
+// Listing 3.10 — search_response_with_confidence.json: a probabilistic response that names its uncertainty
+
+// GET /catalog/search?q=warm+jacket+under+%24100
+// HTTP/1.1 200 OK
+// Semantic path: confidence above threshold, LLM-ranked results.
+{
+  "results": [
+    { "id": "p_001", "name": "Merino Wool Jacket",
+      "price_cents": 8900, "match_score": 0.741 },   // A — match_score from cosine similarity
+    { "id": "p_002", "name": "Fleece Pullover",
+      "price_cents": 5900, "match_score": 0.698 }    // B — score enables consumer-side confidence gates
+  ],
+  "decision": {
+    "strategy":         "semantic",                   // C — which retrieval method was used
+    "confidence":       0.74,                         //     quality estimate of the result
+    "fallback_used":    false,                        //     branching signal for the consumer
+    "fallback_strategy": "keyword_ilike"              //     the deterministic alternative, explicitly named
+  }
+}
+
+// When confidence is below threshold, the endpoint transparently falls back.
+// GET /catalog/search?q=warm+jacket+under+%24100
+// HTTP/1.1 200 OK
+{
+  "results": [
+    { "id": "p_004", "name": "Summer Linen Shirt",
+      "price_cents": 3900, "match_score": null }
+  ],
+  "decision": {
+    "strategy":         "keyword_ilike",
+    "confidence":       null,
+    "fallback_used":    true,                         // D — consumer explicitly informed of the switch
+    "fallback_strategy": "keyword_ilike"
+  }
+}

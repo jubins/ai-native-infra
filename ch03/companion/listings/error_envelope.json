@@ -1,0 +1,22 @@
+// Listing 3.8 — error_envelope.json: the five-field envelope applied to two scenarios
+
+// A client-side validation error: the input was malformed.
+// HTTP/1.1 422 Unprocessable Entity
+{
+  "error_code":    "INVALID_DATE_FORMAT",       // A — stable string identifier; agents branch on this
+  "type":          "validation_error",           // B — coarse classification: validation_error | auth_error | rate_limit | server_error
+  "message":       "shipped_at must be ISO 8601 with timezone offset.",
+  "field":         "shipped_at",                // C — localizes the error to a specific request field
+  "hint":          "Use the format 2026-05-15T08:55:00Z.",
+  "retryable":     false                        // D — no point retrying a malformed field
+}
+
+// A transient server failure: the consumer must back off and retry.
+// HTTP/1.1 503 Service Unavailable
+{
+  "error_code":      "UPSTREAM_TIMEOUT",
+  "type":            "server_error",
+  "message":         "The catalog service did not respond within 5s.",
+  "retryable":       true,
+  "retry_after_ms":  30000                      // E — tells the consumer how long to wait before retrying
+}

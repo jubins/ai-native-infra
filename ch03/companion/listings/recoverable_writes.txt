@@ -1,0 +1,29 @@
+# Listing 3.12 — recoverable_writes.txt: soft delete and approval checkpoint
+
+# Soft delete: the resource is marked, not purged.
+DELETE /catalog/products/p_001
+
+HTTP/1.1 200 OK
+{ "id": "p_001", "status": "DELETED",
+  "purge_after": "2026-09-15T00:00:00Z" }   # A — purge_after tells operator how long soft-deleted data survives
+
+---
+
+# Approval checkpoint: high-consequence operations do not execute immediately.
+POST /orders/bulk-cancel
+{ "order_ids": ["ord_101", "...", "ord_1100"] }    # B — agent issues exactly as any write; safety lives server-side
+
+HTTP/1.1 202 Accepted
+{ "operation_id": "op_77",
+  "status":        "pending_approval",
+  "summary":       "Cancels 1000 orders totalling $84,210.",
+  "approve_via":   "/operations/op_77/approve" }   # C — 202 pending_approval declared in OpenAPI; consumers expect two calls
+
+---
+
+# A human reviews; the second call carries the approval and executes.
+POST /operations/op_77/approve
+Authorization: Bearer <human-approver-token>       # D — approval token belongs to a human
+
+HTTP/1.1 200 OK
+{ "operation_id": "op_77", "status": "executed", "cancelled": 1000 }

@@ -4,7 +4,26 @@ Companion code for chapter 3 of *AI-Native Infrastructure*. This directory
 extends the chapter 2 catalog service with the nine design patterns described
 in sections 3.3–3.7 and adds an orders service demonstrating idempotency.
 
-**Listings in this chapter:**
+**Standalone concept listings (sections 3.2–3.6, illustrative examples):**
+
+| Listing | File | Description |
+| ------- | ---- | ----------- |
+| 3.1 | `listings/tool_definition.json` | Self-describing tool an agent can use without coordination |
+| 3.2 | `listings/error_response_compared.json` | Opaque vs. recoverable error format |
+| 3.3 | `listings/catalog_openapi_compared.yaml` | Loose vs. complete OpenAPI declaration |
+| 3.4 | `listings/orders_descriptions_compared.yaml` | Insufficient vs. sufficient descriptions |
+| 3.5 | `discovery_calls.sh` | Runtime schema discovery (REST, GraphQL, gRPC) |
+| 3.6 | `listings/order_response_compared.txt` | Field-varying vs. deterministic response shape |
+| 3.7 | `listings/order.proto` | Deterministic response shape in gRPC/proto3 |
+| 3.8 | `listings/error_envelope.json` | Five-field error envelope (422 validation + 503 server error) |
+| 3.9 | `listings/error_extensions.json` | Five-field envelope inside a GraphQL `extensions` object |
+| 3.10 | `listings/search_response_with_confidence.json` | Confidence-carrying search response |
+| 3.11 | `listings/idempotent_post.txt` | Write with idempotency key + replay |
+| 3.12 | `listings/recoverable_writes.txt` | Soft delete + approval checkpoint |
+| 3.13 | `listings/deprecation_in_openapi.yaml` | Two-stage field rename in OpenAPI |
+| 3.14 | `listings/changelog_machine.json` | Machine-readable changelog format |
+
+**Build listings (section 3.7, extend the chapter 2 skeleton):**
 
 | Listing | File | Description |
 | ------- | ---- | ----------- |
@@ -105,6 +124,20 @@ target a non-default host.
 
 ```
 ch03/companion/
+├── listings/                                 # Standalone concept listings (3.1–3.14)
+│   ├── tool_definition.json                  # Listing 3.1  — self-describing tool example
+│   ├── error_response_compared.json          # Listing 3.2  — opaque vs. recoverable error
+│   ├── catalog_openapi_compared.yaml         # Listing 3.3  — loose vs. complete OpenAPI declaration
+│   ├── orders_descriptions_compared.yaml     # Listing 3.4  — insufficient vs. sufficient descriptions
+│   ├── order_response_compared.txt           # Listing 3.6  — field-varying vs. deterministic response
+│   ├── order.proto                           # Listing 3.7  — deterministic shape in gRPC/proto3
+│   ├── error_envelope.json                   # Listing 3.8  — five-field error envelope (422 + 503)
+│   ├── error_extensions.json                 # Listing 3.9  — five fields inside a GraphQL extensions object
+│   ├── search_response_with_confidence.json  # Listing 3.10 — confidence-carrying search response
+│   ├── idempotent_post.txt                   # Listing 3.11 — write with idempotency key + replay
+│   ├── recoverable_writes.txt                # Listing 3.12 — soft delete + approval checkpoint
+│   ├── deprecation_in_openapi.yaml           # Listing 3.13 — two-stage field rename
+│   └── changelog_machine.json               # Listing 3.14 — machine-readable changelog format
 ├── catalog/
 │   ├── main.py          # Listings 3.18 + 3.19 — /describe route + search endpoint
 │   ├── errors.py        # Listing 3.16 — structured-error middleware
