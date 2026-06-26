@@ -15,13 +15,15 @@ Companion code for *AI-Native Infrastructure* by Jubin Soni, published by Mannin
 - [Chapter Guide](#chapter-guide)
   - [Chapter 1 — The AI-Native Paradigm Shift](#chapter-1--the-ai-native-paradigm-shift)
   - [Chapter 2 — First Principles and Architectural Patterns](#chapter-2--first-principles-and-architectural-patterns)
-  - [Chapter 3 — API Design and Contract Evolution](#chapter-3--api-design-and-contract Evolution)
+  - [Chapter 3 — API Design and Contract Evolution](#chapter-3--api-design-and-contract-evolution)
   - [Appendix A — Shared Setup](#appendix-a--shared-setup)
 - [License](#license)
 
 ---
 
 ## Overview
+
+A practical guide to infrastructure where AI is a core architectural primitive — not bolted on, but built in from the start, explicitly constrained to where it is essential and excluded where deterministic logic remains the right answer. The playbook for what comes after bolting AI onto systems designed without it.
 
 Each chapter folder contains:
 
