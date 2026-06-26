@@ -10,7 +10,7 @@
 
 set -euo pipefail
 
-COMPOSE_DIR="$(dirname "$0")/skeleton/compose"
+COMPOSE_DIR="$(dirname "$0")"
 BASE_URL="http://localhost:8080"
 PASS=0
 FAIL=0
@@ -21,7 +21,7 @@ header() { echo -e "\n\033[1m$*\033[0m"; }
 
 # ── 1. Bring up ───────────────────────────────────────────────────────────────
 header "Starting containers"
-docker compose -f "$COMPOSE_DIR/docker-compose.yml" up -d --build
+docker compose -f "$COMPOSE_DIR/listing_2_9_docker_compose.yml" up -d --build
 echo "Waiting 12 s for Postgres to initialise…"
 sleep 12
 

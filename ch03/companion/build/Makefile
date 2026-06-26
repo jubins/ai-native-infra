@@ -43,7 +43,7 @@ ps:
 	docker compose ps
 
 smoke:
-	./smoke_tests.sh
+	./listing_3_21_smoke_tests.sh
 
 test:
 	python -m pytest tests/ -v
