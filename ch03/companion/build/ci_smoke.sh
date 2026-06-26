@@ -45,7 +45,7 @@ status=$(http_status "${CATALOG_URL}/catalog/search?q=")
 
 # 4. Missing product returns structured 404
 hr
-body=$(get "${CATALOG_URL}/catalog/products/p_999")
+body=$(curl -s "${CATALOG_URL}/catalog/products/p_999")
 echo "$body" | grep -q "PRODUCT_NOT_FOUND" \
     && pass "[4] Unknown product returns PRODUCT_NOT_FOUND envelope" \
     || fail "[4] Unknown product returned unexpected body: $body"
@@ -78,8 +78,8 @@ echo "$body" | grep -q '"description"' && echo "$body" | grep -q '"decision"' \
 
 # 7. Describe route on unknown product returns structured 404
 hr
-body=$(curl -sf -X POST "${CATALOG_URL}/catalog/products/p_999/describe" \
-    -H 'Content-Type: application/json' || echo "CURL_FAILED")
+body=$(curl -s -X POST "${CATALOG_URL}/catalog/products/p_999/describe" \
+    -H 'Content-Type: application/json')
 echo "$body" | grep -q "PRODUCT_NOT_FOUND" \
     && pass "[7] Describe on unknown product returns PRODUCT_NOT_FOUND envelope" \
     || fail "[7] Describe 404 — unexpected response: $body"
