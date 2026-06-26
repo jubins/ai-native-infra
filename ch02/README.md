@@ -1,114 +1,90 @@
-# Chapter 2 — Companion code
+# Chapter 2 — First Principles and Architectural Patterns
 
-Companion folder for **Chapter 2 — First principles and architectural patterns**.
+Companion code for chapter 2 of *AI-Native Infrastructure*.
 
 ## Setup
 
-```bash
-pip install -r requirements.txt
-export GEMINI_API_KEY="your-api-key-here"
-```
-
-Then run any listing directly:
+The standalone listings depend on shared scaffolding in `appendix_a/`.
+Install once from the repo root:
 
 ```bash
-python listings/listing_2_1_string_match.py
+pip install -r appendix_a/requirements.txt
+export GEMINI_API_KEY="your-key-here"
 ```
+
+Run listings from the repo root so Python can find `ch02_setup`:
+
+```bash
+python ch02/companion/listings/listing_2_1_string_match.py
+```
+
+See `appendix_a/README.md` for details on what each key is needed for.
 
 ## Structure
 
 ```
 ch02/companion/
-├── listings/                          # standalone concept listings — run directly with python
-│   ├── listing_2_1_string_match.py
-│   ├── listing_2_2_semantic_search.py
-│   └── ... (see table below)
-├── build/                             # runnable platform skeleton (section 2.4, Listings 2.9–2.13)
-│   ├── gateway/                       # Listing 2.10 — path-based proxy
-│   ├── catalog/                       # Listing 2.11 — ILIKE catalog service
-│   ├── checkout/                      # stub service
-│   ├── orders/                        # stub service
-│   ├── listing_2_9_docker_compose.yml # seven-container Compose stack
-│   ├── listing_2_12_postgres_init.sql # three databases + seed data
-│   └── listing_2_13_smoke_test.sh     # bring up and verify the skeleton
-├── ch02_setup.py                      # shared scaffolding imported by the listings
-└── requirements.txt
+├── listings/     # standalone concept listings — one file per chapter listing
+├── bonus/        # extra runnable examples for patterns from Table 2.4
+└── build/        # runnable platform skeleton (Listings 2.9–2.13)
 ```
 
-`ch02_setup.py` is shared scaffolding imported by most listings:
+## Standalone listings (sections 2.1–2.2)
 
-- `call_with_envelope(prompt, schema, fallback, …)` — the bounded-intelligence envelope used by every AI-native listing.
-- `embed(text)` — produces a 768-dim vector via `gemini-embedding-001`.
-- `Confidence` — Pydantic mixin that every structured response inherits from.
-- `SAMPLE_PRODUCTS` — a tiny in-memory product catalog used by the search and storage examples.
+Each file corresponds directly to a numbered listing in the chapter:
 
-## Standalone listings (section 2.2–2.3)
+| Listing | File | What it does |
+| ------- | ---- | ------------ |
+| 2.1 | `listings/listing_2_1_string_match.py` | Traditional ILIKE search; returns 0 results for natural-language queries |
+| 2.2 | `listings/listing_2_2_semantic_search.py` | Semantic search via embeddings; returns ranked results |
+| 2.3 | `listings/listing_2_3_static_autoscaler.py` | Static CPU-threshold autoscaler; wrong in both directions |
+| 2.4 | `listings/listing_2_4_autonomous_autoscaler.py` | Autonomous autoscaler with envelope and fallback |
+| 2.5 | `listings/listing_2_5_ranker_antipattern.py` | Anti-pattern: ranker that learns from its own decisions |
+| 2.6 | `listings/listing_2_6_bounded_intelligence.py` | Bounded-intelligence envelope demonstrated end-to-end |
+| 2.7 | `listings/listing_2_7_semantic_routing.py` | Semantic routing: picks a service from the meaning of the request |
+| 2.8 | `listings/listing_2_8_predictive_scaling.py` | Predictive scaling: slow loop writes forecast, fast loop reads it |
 
-The filename includes a short slug so you can find the listing by topic without
-opening the file first:
+## Bonus listings (patterns from Table 2.4)
 
-| In the chapter | File                                        | What it does                                      |
-| -------------- | ------------------------------------------- | ------------------------------------------------- |
-| Listing 2.1    | `ch02_setup.py`                             | Shared scaffolding — imported by other listings.  |
-| Listing 2.2    | `listing_2_1_string_match.py`               | Traditional ILIKE search; returns 0 results.      |
-| Listing 2.3    | `listing_2_2_semantic_search.py`            | Semantic search via embeddings; returns 3.        |
-| Listing 2.4    | `listing_2_3_static_autoscaler.py`          | Static autoscaler rule; wrong both ways.          |
-| Listing 2.5    | `listing_2_4_autonomous_autoscaler.py`      | Autonomous autoscaler with envelope and fallback. |
-| Listing 2.6    | `listing_2_5_ranker_antipattern.py`         | Anti-pattern: ranker training on its own output.  |
-| Listing 2.7    | `listing_2_6_bounded_intelligence.py`       | Bounded-intelligence envelope demo.               |
-| Listing 2.8    | `listing_2_7_semantic_routing.py`           | Semantic routing.                                 |
-| Listing 2.9    | `listing_2_8_adaptive_api.py`               | Adaptive API translation.                         |
-| Listing 2.10   | `listing_2_9_hybrid_storage.py`             | Hybrid storage — exact + semantic side by side.   |
-| Listing 2.11   | `listing_2_10_intelligent_events.py`        | Intelligent events with allowlist.                |
-| Listing 2.12   | `listing_2_11_observability.py`             | Natural-language observability.                   |
-| Listing 2.13   | `listing_2_12_autonomous_healing.py`        | Autonomous healing inside scope.                  |
-| Listing 2.14   | `listing_2_13_adaptive_security.py`         | Adaptive security: flag, do not block.            |
-| Listing 2.15   | `listing_2_14_predictive_scaling.py`        | Predictive scaling: slow write loop / fast read.  |
-| Listing 2.16   | `listing_2_15_chained_calls_antipattern.py` | Anti-pattern: chained AI calls without checks.    |
+The chapter introduces eight infrastructure patterns; only semantic routing and
+predictive scaling are developed into full numbered listings. The `bonus/`
+directory contains runnable implementations of the remaining six patterns from
+Table 2.4, plus one additional anti-pattern. They follow the same
+bounded-intelligence structure as the chapter listings and are a useful
+reference when applying these patterns in your own systems.
 
-## Build listings — skeleton platform (section 2.4)
+| File | Pattern |
+| ---- | ------- |
+| `bonus/adaptive_api.py` | Adaptive APIs — model maps fields by meaning across schema versions |
+| `bonus/hybrid_storage.py` | Hybrid storage — exact match and semantic search side by side |
+| `bonus/intelligent_events.py` | Intelligent events — priority and routing inferred from event content |
+| `bonus/observability.py` | AI-native observability — natural-language question answered from telemetry |
+| `bonus/autonomous_healing.py` | Autonomous healing — model proposes one action from a fixed allowlist |
+| `bonus/adaptive_security.py` | Adaptive security — model flags requests that deviate from a baseline |
+| `bonus/chained_calls_antipattern.py` | Anti-pattern: chained AI calls without guardrails between steps |
 
-The `build/` subfolder contains the seven-container platform skeleton.
-Listings here are named files so you can open the exact file the chapter references:
+## Build listings — platform skeleton (section 2.4)
 
-| In the chapter | File                                          | Description                              |
-| -------------- | --------------------------------------------- | ---------------------------------------- |
-| Listing 2.9    | `build/listing_2_9_docker_compose.yml`        | Seven-container Compose stack            |
-| Listing 2.10   | `build/gateway/main.py`                       | Path-based proxy gateway                 |
-| Listing 2.11   | `build/catalog/main.py`                       | Minimal catalog service with ILIKE search|
-| Listing 2.12   | `build/listing_2_12_postgres_init.sql`        | Three databases + product seed data      |
-| Listing 2.13   | `build/listing_2_13_smoke_test.sh`            | Bring up and verify the skeleton         |
+The `build/` directory contains the seven-container platform skeleton.
+These are the files the chapter references in sections 2.4.5–2.4.9:
+
+| Listing | File | Description |
+| ------- | ---- | ----------- |
+| 2.9  | `build/listing_2_9_docker_compose.yml` | Seven-container Compose stack |
+| 2.10 | `build/gateway/main.py` | Path-based proxy gateway |
+| 2.11 | `build/catalog/main.py` | Minimal catalog service with ILIKE search |
+| 2.12 | `build/listing_2_12_postgres_init.sql` | Three databases + product seed data |
+| 2.13 | `build/listing_2_13_smoke_test.sh` | Bring up and verify the skeleton |
 
 To bring it up:
 
 ```bash
-cd build
+cd ch02/companion/build
 docker compose -f listing_2_9_docker_compose.yml up -d --build
-curl http://localhost:8080/health
-```
-
-Or run the smoke test end-to-end:
-
-```bash
-cd build
 bash listing_2_13_smoke_test.sh
 ```
 
-> **What this builds:** a gateway routing to three services (catalog, checkout,
-> orders) backed by a single Postgres instance, plus Redis and Kafka wired for
-> later chapters. The catalog uses a plain ILIKE search — intentionally limited
-> so chapter 3 has a clear starting point to improve.
-
-## Listings that need an API key
-
-Listings that call Gemini (any listing using `embed` or `call_with_envelope`
-without a mock) require `GEMINI_API_KEY`. Listings that demonstrate failure
-modes or use mock LLMs run without a key:
-
-- No key needed: `listing_2_1_string_match.py`, `listing_2_3_static_autoscaler.py`, `listing_2_5_ranker_antipattern.py`, `listing_2_6_bounded_intelligence.py`, `listing_2_15_chained_calls_antipattern.py`
-- Key required: `listing_2_2_semantic_search.py`, `listing_2_4_autonomous_autoscaler.py`, `listing_2_7_semantic_routing.py` through `listing_2_14_predictive_scaling.py`
-
-If the LLM call fails for any reason (no key, network, rate limit, malformed
-response, low confidence), the envelope falls back to the deterministic path
-defined per listing, and the script still produces output. This is the
-bounded-intelligence principle in action.
+> **What this builds:** a gateway routing to catalog, checkout, and orders,
+> backed by a single Postgres instance, with Redis and Kafka wired for later
+> chapters. The catalog uses plain ILIKE search — intentionally limited so
+> chapter 3 has a clear baseline to improve on.

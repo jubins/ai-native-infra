@@ -131,6 +131,14 @@ response is uncertain, and recover from errors without human intervention.
 - A Gemini API key for the `/describe` endpoint (falls back gracefully without one)
 - Python 3.10+ if you want to run pytest locally
 
+> **Note:** the `describe.py` endpoint (Listing 3.17) calls Gemini to generate
+> product descriptions. It implements the same bounded-intelligence envelope
+> introduced in chapter 2 (appendix A) — try the LLM, fall back to a static
+> template on any failure — but does so inline rather than importing
+> `ch02_setup.py`. The build services are self-contained Docker images; their
+> dependencies live in `build/catalog/requirements.txt` and
+> `build/orders/requirements.txt`, not in `appendix_a/`.
+
 ## Quickstart
 
 ```bash
@@ -192,6 +200,6 @@ exactly what changed at each version without parsing prose release notes.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r build/catalog/requirements.txt
 cd build && make up && make test
 ```

@@ -1,0 +1,10 @@
+# Appendix A — shared dependencies for standalone listings
+#
+# Install once before running any listing from any chapter:
+#   pip install -r appendix_a/requirements.txt
+#
+# The build/ directories inside each chapter contain their own per-service
+# requirements.txt files used by Docker — do not replace those with this file.
+
+google-genai~=1.74   # Gemini SDK with native structured output
+pydantic~=2.13       # Schema validation for structured LLM responses
